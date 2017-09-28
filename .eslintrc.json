@@ -23,6 +23,7 @@
 		"no-shadow": "error",
 		"object-curly-spacing": "off",
 		"no-invalid-this": "off",
-		"no-constant-condition": "off"
+		"no-constant-condition": "off",
+		"no-console": "off"
 	}
 }

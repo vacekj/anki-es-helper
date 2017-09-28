@@ -5,8 +5,11 @@ node_modules
 # Debug log from npm
 npm-debug.log
 
-#VSCode config
+# VSCode config
 .vscode
 
-#Anki Export
+# Anki Export
 anki_export.json
+
+# Media folder
+media
