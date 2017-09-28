@@ -66,7 +66,7 @@ async function getData(card) {
 	let definition = $(definitionSelector).text();
 
 	// audio
-	const audioSelector = 'div#translate-en div.quickdef a';
+	const audioSelector = 'div[id^=translate] div.quickdef a';
 	let audioURL = $(audioSelector).first().attr('href') + '.mp3';
 	if (audioURL == 'undefined.mp3') {
 		console.log('');
