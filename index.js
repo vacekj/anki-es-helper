@@ -66,8 +66,11 @@ async function getData(card) {
 	let definition = $(definitionSelector).text();
 
 	// audio
-	const audioSelector = 'body > div.content-container.container > div.main-container > div.translate > div:nth-child(1) > div.quickdef > div.source > span > a.audio-start.js-audio-refresh';
-	let audioURL = $(audioSelector).attr('href') + '.mp3';
+	const audioSelector = 'div#translate-en div.quickdef a';
+	let audioURL = $(audioSelector).first().attr('href') + '.mp3';
+	if (audioURL == 'undefined.mp3') {
+		console.log('');
+	}
 	let audioFileName = word + '.mp3';
 	let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
 	request.get(audioURL).pipe(writeStream);
