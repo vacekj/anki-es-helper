@@ -61,12 +61,14 @@ async function getData(card) {
 	let spanishDictPage = await request('http://www.spanishdict.com/translate/' + word);
 	let $ = cheerio.load(spanishDictPage);
 
+	// TODO: check if word was found, if not return a NOTFOUND definition
+
 	// definition (English translation)
 	const definitionSelector = 'body > div.content-container.container > div.main-container > div.translate > div:nth-child(1) > div.quickdef > div.lang > div';
 	let definition = $(definitionSelector).text();
 
 	// audio
-	const audioSelector = 'div[id^=translate] div.quickdef a';
+	const audioSelector = 'span.media-links a';
 	let audioURL = $(audioSelector).first().attr('href') + '.mp3';
 	if (audioURL == 'undefined.mp3') {
 		console.log('');
