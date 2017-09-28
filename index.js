@@ -3,6 +3,7 @@ const jsonfile = require('jsonfile');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const translate = require('google-translate-api');
+const del = require('del');
 
 const config = {
 	input: 'anki_export.json',
@@ -14,13 +15,28 @@ const config = {
 		example: 'Example',
 		example___: 'Example___'
 	},
-	mediaFolder: './media'
+	outputDir: './output',
+	get mediaDir() { return this.outputDir + '/media' }
 };
 
-let inputCollection = jsonfile.readFileSync(config.input);
-processInput(inputCollection).then((cards) => {
-	console.log(cards);
-});
+main();
+
+function main() {
+	setupDirStructure();
+	let inputCollection = jsonfile.readFileSync(config.input);
+	let cleanedInput = cleanInput(inputCollection);
+	processInput(cleanedInput).then((cards) => {
+		console.log(cards);
+	});
+}
+
+function setupDirStructure() {
+	// delete output directory
+	del.sync(config.outputDir + '/');
+	// recreate directory structure
+	fs.mkdirSync(config.outputDir);
+	fs.mkdirSync(config.mediaDir);
+}
 
 function cleanInput(input) {
 	return input.filter((card) => {
@@ -32,8 +48,9 @@ async function processInput(input) {
 	let result = await Promise.all(
 		input.map(async (card) => {
 			let data = await getData(card);
-			// Merge the data with the original card
-			return data;
+			let modifiedCard = card;
+			Object.assign(modifiedCard, data);
+			return modifiedCard;
 		})
 	);
 	return result;
@@ -52,7 +69,7 @@ async function getData(card) {
 	const audioSelector = 'body > div.content-container.container > div.main-container > div.translate > div:nth-child(1) > div.quickdef > div.source > span > a.audio-start.js-audio-refresh';
 	let audioURL = $(audioSelector).attr('href') + '.mp3';
 	let audioFileName = word + '.mp3';
-	let writeStream = fs.createWriteStream(`${config.mediaFolder}/${audioFileName}`);
+	let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
 	request.get(audioURL).pipe(writeStream);
 	let audio = `[sound:${audioFileName}]`;
 
