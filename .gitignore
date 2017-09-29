@@ -11,5 +11,5 @@ npm-debug.log
 # Anki Export
 anki_export.json
 
-# Media folder
-media
+# Output folder
+output
