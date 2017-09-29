@@ -5,6 +5,7 @@ const fs = require('fs');
 const translate = require('google-translate-api');
 const del = require('del');
 const streamToPromise = require('stream-to-promise');
+const PAll = require('p-all');
 
 const config = {
 	input: 'anki_export.json',
@@ -46,14 +47,14 @@ function cleanInput(input) {
 }
 
 async function processInput(input) {
-	let result = await Promise.all(
-		input.map(async (card) => {
-			let data = await getData(card);
-			let modifiedCard = card;
-			Object.assign(modifiedCard, data);
-			return modifiedCard;
-		})
-	);
+	const mapper = (card) => {
+		let data = await getData(card);
+		let modifiedCard = card;
+		Object.assign(modifiedCard, data);
+		return modifiedCard;
+	};
+
+	let result = await pMap(site, mapper, { concurrency: 2 });
 	return result;
 }
 
@@ -67,7 +68,7 @@ async function getData(card) {
 		return {
 			definition: "notfound"
 		};
-	}	
+	}
 
 	// definition (English translation)
 	const definitionSelector = 'body > div.content-container.container > div.main-container > div.translate > div:nth-child(1) > div.quickdef > div.lang > div';

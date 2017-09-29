@@ -19,6 +19,8 @@
 		"del": "^3.0.0",
 		"google-translate-api": "^2.3.0",
 		"jsonfile": "^4.0.0",
+		"p-all": "^1.0.0",
+		"p-map": "^1.2.0",
 		"request": "^2.83.0",
 		"request-promise": "^4.2.2",
 		"stream-to-promise": "^2.2.0"

@@ -12,6 +12,7 @@
 		"node": true
 	},
 	"rules": {
+		"no-undef": "error",
 		"space-before-function-paren": "off",
 		"eol-last": "off",
 		"no-var": "off",
