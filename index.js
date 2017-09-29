@@ -6,6 +6,7 @@ const translate = require('google-translate-api');
 const del = require('del');
 const streamToPromise = require('stream-to-promise');
 const pMap = require('p-map');
+const chalk = require('chalk');
 
 const config = {
 	concurrency: 10,
@@ -31,7 +32,7 @@ async function main() {
 	let cleanedInput = cleanInput(inputCollection);
 	let output = await processInput(cleanedInput);
 	writeOutput(output);
-	console.log('Success!');
+	console.log(chalk.green('Success!'));
 }
 
 function setupDirStructure() {
@@ -55,6 +56,7 @@ async function processInput(input) {
 		let data = await getData(card);
 		let modifiedCard = card;
 		Object.assign(modifiedCard, data);
+		console.log(`Card processed: ${chalk.blue(card[config.fields.word])}`);
 		return modifiedCard;
 	};
 
