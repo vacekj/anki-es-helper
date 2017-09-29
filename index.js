@@ -4,6 +4,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const translate = require('google-translate-api');
 const del = require('del');
+const streamToPromise = require('stream-to-promise');
 
 const config = {
 	input: 'anki_export.json',
@@ -61,7 +62,12 @@ async function getData(card) {
 	let spanishDictPage = await request('http://www.spanishdict.com/translate/' + word);
 	let $ = cheerio.load(spanishDictPage);
 
-	// TODO: check if word was found, if not return a NOTFOUND definition
+	// word not found
+	if ($('.dictionary-entry').length == 0) {
+		return {
+			definition: "notfound"
+		};
+	}	
 
 	// definition (English translation)
 	const definitionSelector = 'body > div.content-container.container > div.main-container > div.translate > div:nth-child(1) > div.quickdef > div.lang > div';
@@ -70,12 +76,10 @@ async function getData(card) {
 	// audio
 	const audioSelector = 'span.media-links a';
 	let audioURL = $(audioSelector).first().attr('href') + '.mp3';
-	if (audioURL == 'undefined.mp3') {
-		console.log('');
-	}
 	let audioFileName = word + '.mp3';
 	let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
 	request.get(audioURL).pipe(writeStream);
+	await streamToPromise(writeStream);
 	let audio = `[sound:${audioFileName}]`;
 
 	// translation
@@ -90,11 +94,11 @@ async function getData(card) {
 	let example___ = example.replaceAll(word, '   ');
 
 	return {
-		definition,
-		audio,
-		translation,
-		example,
-		example___
+		Definition: definition,
+		Audio: audio,
+		Translation: translation,
+		Example: example,
+		Example___: example___
 	};
 }
 
