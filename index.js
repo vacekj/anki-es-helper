@@ -5,7 +5,7 @@ const fs = require('fs');
 const translate = require('google-translate-api');
 const del = require('del');
 const streamToPromise = require('stream-to-promise');
-const PAll = require('p-all');
+const pMap = require('p-map');
 
 const config = {
 	input: 'anki_export.json',
@@ -18,18 +18,18 @@ const config = {
 		example___: 'Example___'
 	},
 	outputDir: './output',
-	get mediaDir() { return this.outputDir + '/media' }
+	get mediaDir() { return this.outputDir + '/media'; },
+	get outputFile() { return this.outputDir + '/output.txt'; }
 };
 
 main();
 
-function main() {
+async function main() {
 	setupDirStructure();
 	let inputCollection = jsonfile.readFileSync(config.input);
 	let cleanedInput = cleanInput(inputCollection);
-	processInput(cleanedInput).then((cards) => {
-		console.log(cards);
-	});
+	let output = await processInput(cleanedInput);
+	writeOutput(output);
 }
 
 function setupDirStructure() {
@@ -47,14 +47,14 @@ function cleanInput(input) {
 }
 
 async function processInput(input) {
-	const mapper = (card) => {
+	const mapper = async (card) => {
 		let data = await getData(card);
 		let modifiedCard = card;
 		Object.assign(modifiedCard, data);
 		return modifiedCard;
 	};
 
-	let result = await pMap(site, mapper, { concurrency: 2 });
+	let result = await pMap(input, mapper, { concurrency: 2 });
 	return result;
 }
 
@@ -81,6 +81,7 @@ async function getData(card) {
 	let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
 	request.get(audioURL).pipe(writeStream);
 	await streamToPromise(writeStream);
+	writeStream.end();
 	let audio = `[sound:${audioFileName}]`;
 
 	// translation
@@ -101,6 +102,16 @@ async function getData(card) {
 		Example: example,
 		Example___: example___
 	};
+}
+
+async function writeOutput(output) {
+	let stream = fs.createWriteStream(config.outputFile);
+	output.forEach(function(card) {
+		// one line = one card
+		let line = `${card.Definition}\t${card.Audio}\t${card.Translation}\t${card.Example}\t${card.Example___}\t\n`;
+		stream.write(line);
+	});
+	stream.end();
 }
 
 String.prototype.replaceAll = function (target, replacement) {

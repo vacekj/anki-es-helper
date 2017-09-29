@@ -25,6 +25,7 @@
 		"object-curly-spacing": "off",
 		"no-invalid-this": "off",
 		"no-constant-condition": "off",
-		"no-console": "off"
+		"no-console": "off",
+		"semi": "error"
 	}
 }
