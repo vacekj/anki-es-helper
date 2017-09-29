@@ -8,7 +8,7 @@ const streamToPromise = require('stream-to-promise');
 const pMap = require('p-map');
 
 const config = {
-	concurrency: 5,
+	concurrency: 10,
 	input: 'anki_export.json',
 	fields: {
 		word: 'Word',
@@ -31,6 +31,7 @@ async function main() {
 	let cleanedInput = cleanInput(inputCollection);
 	let output = await processInput(cleanedInput);
 	writeOutput(output);
+	console.log('Success!');
 }
 
 function setupDirStructure() {
@@ -98,7 +99,7 @@ async function getData(card) {
 	let example = originalExample.replaceAll('<b>', '').replaceAll('</b>', '');
 
 	// generate example___
-	let example___ = example.replaceAll(word, '   ');
+	let example___ = example.replaceAll(word, '___').replaceAll('<u>', '').replaceAll('</u>', '');
 
 	return {
 		Definition: definition,
