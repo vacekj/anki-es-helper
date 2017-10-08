@@ -70,13 +70,13 @@ async function getData(card) {
 	let definition = $(definitionSelector).text();
 
 	// audio
-	const audioSelector = 'span.media-links a';
-	let audioURL = $(audioSelector).first().attr('href') + '.mp3';
 	let audioFileName = word + '.mp3';
-	let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
-	request.get(audioURL).pipe(writeStream);
-	await streamToPromise(writeStream);
-	writeStream.end();
+	// let audioURL = $(audioSelector).first().attr('href') + '.mp3';
+	// const audioSelector = 'span.media-links a';
+	// let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
+	// request.get(audioURL).pipe(writeStream);
+	// await streamToPromise(writeStream);
+	// writeStream.end();
 	let audio = `[sound:${audioFileName}]`;
 
 	// translation
@@ -85,10 +85,13 @@ async function getData(card) {
 
 	// format example
 	let originalExample = card[config.fields.example];
-	let example = originalExample.replaceAll('<b>', '').replaceAll('</b>', '');
+	let example = originalExample.replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('<br>', '');
 
 	// generate example___
-	let example___ = example.replaceAll(word, '___').replaceAll('<u>', '').replaceAll('</u>', '');
+	let regexp = '<u>(.*?)<\/u>';
+	let match = example.match(regexp);
+	let wordMatch = match[1];
+	let example___ = example.replaceAll(wordMatch, '___').replaceAll('<u>', '').replaceAll('</u>', '');
 
 	return {
 		Definition: definition,
