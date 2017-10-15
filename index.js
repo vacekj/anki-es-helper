@@ -71,18 +71,19 @@ async function getData(card) {
 
 	// audio
 	let audioFileName = word + '.mp3';
-	// let audioURL = $(audioSelector).first().attr('href') + '.mp3';
-	// const audioSelector = 'span.media-links a';
-	// let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
-	// request.get(audioURL).pipe(writeStream);
-	// await streamToPromise(writeStream);
-	// writeStream.end();
+	let audioURL = $(audioSelector).first().attr('href') + '.mp3';
+	const audioSelector = 'span.media-links a';
+	let writeStream = fs.createWriteStream(`${config.mediaDir}/${audioFileName}`);
+	request.get(audioURL).pipe(writeStream);
+	await streamToPromise(writeStream);
+	writeStream.end();
 	let audio = `[sound:${audioFileName}]`;
 
 	// translation
 	let translated = await translate(word, { from: 'es', to: 'cs' });
 	let translation = translated.text;
 
+	// TODO: detect if example is present, if not, download it
 	// format example
 	let originalExample = card[config.fields.example];
 	let example = originalExample.replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('<br>', '');
