@@ -113,8 +113,9 @@ async function writeOutput(output) {
 	stream.end();
 }
 
-String.prototype.replaceAll = function (target, replacement) {
-	return this.split(target).join(replacement);
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'gi'), replacement);
 };
 
 function removeDuplicates(myArr, prop) {
