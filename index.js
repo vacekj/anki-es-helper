@@ -44,7 +44,7 @@ async function processInput(input) {
 			let modifiedCard = card;
 			Object.assign(modifiedCard, data);
 			console.log(`Card processed: ${chalk.blue(card[config.fields.word])}`);
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise(resolve => setTimeout(resolve, 300));
 			return modifiedCard;
 		} catch (error) {
 			throw error;
@@ -102,7 +102,9 @@ async function getData(card) {
 }
 
 async function writeOutput(output) {
-	let stream = fs.createWriteStream(config.outputFile);
+	let stream = fs.createWriteStream(config.outputFile, {
+		encoding: "utf8"
+	});
 	output.forEach(function (card) {
 		// one line = one card
 		let line = `${card.Word}\t${card.Definition}\t${card.Translation}\t${card.Example}\t${card.Example___}\t${card.Audio}\t\t\n`;

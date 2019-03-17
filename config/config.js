@@ -1,5 +1,5 @@
 module.exports = {
-	concurrency: 1,
+	concurrency: 3,
 	input: './input/' + 'anki_export.json',
 	fields: {
 		word: 'Word',
