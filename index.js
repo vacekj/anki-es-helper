@@ -7,9 +7,15 @@ const del = require('del');
 const streamToPromise = require('stream-to-promise');
 const pMap = require('p-map');
 const chalk = require('chalk');
+const _cliProgress = require('cli-progress');
 
 // Config file
 const config = require('./config/config.js');
+
+// create a new progress bar instance and use shades_classic theme
+const bar1 = new _cliProgress.Bar({}, _cliProgress.Presets.shades_classic);
+
+const writeStream = fs.createWriteStream(config.outputFile);
 
 main();
 
@@ -17,16 +23,13 @@ async function main() {
 	setupDirStructure();
 	let inputCollection = jsonfile.readFileSync(config.input);
 	let cleanedInput = cleanInput(inputCollection);
+	bar1.start(cleanedInput.length, 0);
 	let output = await processInput(cleanedInput);
 	writeOutput(output);
 	console.log(chalk.green('Success!'));
 }
 
 function setupDirStructure() {
-	// delete output directory
-	del.sync(config.outputDir + '/');
-	// recreate directory structure
-	fs.mkdirSync(config.outputDir);
 }
 
 function cleanInput(input) {
@@ -38,18 +41,22 @@ function cleanInput(input) {
 }
 
 async function processInput(input) {
-	const mapper = async (card) => {
+	const mapper = async (card, index) => {
 		try {
 			let data = await getData(card);
 			let modifiedCard = card;
 			Object.assign(modifiedCard, data);
-			console.log(`Card processed: ${chalk.blue(card[config.fields.word])}`);
-			await new Promise(resolve => setTimeout(resolve, 300));
-			return modifiedCard;
+
+			await new Promise(resolve => setTimeout(resolve, config.delay));
+
+			let line = `${modifiedCard.Word}\t${modifiedCard.Definition}\t${modifiedCard.Translation}\t${modifiedCard.Example}\t${modifiedCard.Example___}\t${modifiedCard.Audio}\t\t\n`;
+			writeStream.write(line);
+
+			console.log(`Card processed: ${chalk.orange(card[config.fields.word])}`);
+			bar1.update(index + 1);
 		} catch (error) {
 			throw error;
 		}
-
 	};
 	try {
 		let result = await pMap(input, mapper, { concurrency: config.concurrency });
@@ -61,11 +68,13 @@ async function processInput(input) {
 }
 
 async function getData(card) {
-	let word = card[config.fields.word];
-	let spanishDictPage = await request('http://www.spanishdict.com/translate/' + word);
-	let $ = cheerio.load(spanishDictPage);
-
-	// TODO: detect network error, then retry 
+	var word = card[config.fields.word];
+	try {
+		var spanishDictPage = await request('http://www.spanishdict.com/translate/' + word);
+	} catch (error) {
+		throw error;
+	}
+	var $ = cheerio.load(spanishDictPage);
 
 	// word not found
 	if ($('.dictionary-entry').length == 0) {
@@ -102,15 +111,7 @@ async function getData(card) {
 }
 
 async function writeOutput(output) {
-	let stream = fs.createWriteStream(config.outputFile, {
-		encoding: "utf8"
-	});
-	output.forEach(function (card) {
-		// one line = one card
-		let line = `${card.Word}\t${card.Definition}\t${card.Translation}\t${card.Example}\t${card.Example___}\t${card.Audio}\t\t\n`;
-		stream.write(line);
-	});
-	stream.end();
+	writeStream.end();
 }
 
 String.prototype.replaceAll = function (search, replacement) {
