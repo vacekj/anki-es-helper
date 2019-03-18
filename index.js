@@ -2,7 +2,6 @@ const request = require('request-promise');
 const jsonfile = require('jsonfile');
 const cheerio = require('cheerio');
 const fs = require('fs');
-const translate = require('@vitalets/google-translate-api');
 const del = require('del');
 const streamToPromise = require('stream-to-promise');
 const pMap = require('p-map');
@@ -52,7 +51,7 @@ async function processInput(input) {
 			let line = `${modifiedCard.Word}\t${modifiedCard.Definition}\t${modifiedCard.Translation}\t${modifiedCard.Example}\t${modifiedCard.Example___}\t${modifiedCard.Audio}\t\t\n`;
 			writeStream.write(line);
 
-			console.log(`Card processed: ${chalk.orange(card[config.fields.word])}`);
+			console.log(`Card processed: ${chalk.yellow(card[config.fields.word])}`);
 			bar1.update(index + 1);
 		} catch (error) {
 			throw error;
@@ -89,8 +88,7 @@ async function getData(card) {
 
 	// translation
 	try {
-		var translated = await translate(word, { from: 'es', to: 'cs' });
-		var translation = translated.text;
+		var translation = await translate(definition);
 	} catch (error) {
 		throw error;
 	}
@@ -112,6 +110,28 @@ async function getData(card) {
 
 async function writeOutput(output) {
 	writeStream.end();
+}
+
+
+/**
+ * Translates word from english to czech
+ *
+ * @param {*} word
+ */
+async function translate(word) {
+	try {
+		let babLaPage = await request('https://en.bab.la/dictionary/english-czech/' + word);
+		let $ = cheerio.load(babLaPage);
+		let quickResultEntries = $("div.quick-result-entry");
+		let correctQuickResultEntry = quickResultEntries.filter((index, element) => {
+			return $("a.babQuickResult", element).text() === word;
+		});
+		let quickResultOverview = $("ul.sense-group-results > li > a", correctQuickResultEntry[0]);
+		let text = quickResultOverview.toArray().reduce((a, li) => a += " " + li.firstChild.data, "");
+		return text;
+	} catch (error) {
+		throw error;
+	}
 }
 
 String.prototype.replaceAll = function (search, replacement) {

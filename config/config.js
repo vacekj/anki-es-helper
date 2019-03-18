@@ -1,6 +1,6 @@
 module.exports = {
-	concurrency: 3, /* How many cards to process at a time */
-	delay: 300, /* How many ms to wait after processing a card */
+	concurrency: 1, /* How many cards to process at a time */
+	delay: 1000, /* How many ms to wait after processing a card */
 	input: './input/' + 'anki_export.json',
 	fields: {
 		word: 'Word',
