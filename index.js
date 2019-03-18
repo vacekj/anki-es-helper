@@ -2,8 +2,6 @@ const request = require('request-promise');
 const jsonfile = require('jsonfile');
 const cheerio = require('cheerio');
 const fs = require('fs');
-const del = require('del');
-const streamToPromise = require('stream-to-promise');
 const pMap = require('p-map');
 const chalk = require('chalk');
 const _cliProgress = require('cli-progress');
@@ -39,6 +37,8 @@ function cleanInput(input) {
 	return deDupedArray;
 }
 
+let cardsProcessed = 0;
+
 async function processInput(input) {
 	const mapper = async (card, index) => {
 		try {
@@ -51,8 +51,9 @@ async function processInput(input) {
 			let line = `${modifiedCard.Word}\t${modifiedCard.Definition}\t${modifiedCard.Translation}\t${modifiedCard.Example}\t${modifiedCard.Example___}\t${modifiedCard.Audio}\t\t\n`;
 			writeStream.write(line);
 
-			console.log(`Card processed: ${chalk.yellow(card[config.fields.word])}`);
-			bar1.update(index + 1);
+			console.clear();
+			console.log(`Card processed: ${chalk.yellow(card[config.fields.word])} \n`);
+			bar1.update(cardsProcessed++);
 		} catch (error) {
 			throw error;
 		}
@@ -120,7 +121,7 @@ async function writeOutput(output) {
  */
 async function translate(word) {
 	try {
-		let babLaPage = await request('https://en.bab.la/dictionary/english-czech/' + word);
+		let babLaPage = await request('https://en.bab.la/dictionary/english-czech/' + word.replaceAll(" ", "-"));
 		let $ = cheerio.load(babLaPage);
 		let quickResultEntries = $("div.quick-result-entry");
 		let correctQuickResultEntry = quickResultEntries.filter((index, element) => {
@@ -128,7 +129,7 @@ async function translate(word) {
 		});
 		let quickResultOverview = $("ul.sense-group-results > li > a", correctQuickResultEntry[0]);
 		let text = quickResultOverview.toArray().reduce((a, li) => a += " " + li.firstChild.data, "");
-		return text;
+		return text.trim();
 	} catch (error) {
 		throw error;
 	}
