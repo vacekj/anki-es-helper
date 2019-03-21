@@ -1,27 +1,25 @@
 # Anki Español Helper
 
-A Node.js script to enhance your Spanish Anki cards.
+A Node.js script to create cards out of a list of spanish word, context pairs.
 
-**WIP: Feedback will be rewarded!**
 
 ### Features
 - Download and add
 	- Definitions	
-	- Pronunciations
 	- Translations
-- Format Example fields
+- Create cloze example field
 
 ### Sources
 - Definitions & Pronunciations: SpanishDict
-- Translations: Google Translate
+- Translations: bab.la
 
 ### How to use
 
-0. [Install Node.js](https://nodejs.org/dist/v8.6.0/node-v8.6.0-x64.msi) if you haven't already 
-1. Export the desired deck into a JSON file using [this addon](https://ankiweb.net/shared/info/1589071665)
-2. Move the JSON file into the input folder
-3. Edit the config (./config/config.js) to suit your needs.
-4. `npm start`
+1. [Install Node.js](https://nodejs.org/dist/v8.6.0/node-v8.6.0-x64.msi) if you haven't already 
+2. Export the desired deck into a JSON file using [this addon](https://ankiweb.net/shared/info/1589071665)
+3. Move the JSON file into the input folder
+4. Edit the config (./config/config.js) to suit your needs.
+5. `npm start`
 
 ### Contributing
 
